@@ -428,6 +428,8 @@ def basic_uncompiled_schema_test_dict():
             'tags': [],
             'vars': {},
             'severity': 'ERROR',
+            'warn_if': '>0',
+            'error_if': '>0',
         },
         'deferred': False,
         'docs': {'show': True},
@@ -477,6 +479,8 @@ def basic_compiled_schema_test_dict():
             'tags': [],
             'vars': {},
             'severity': 'warn',
+            'warn_if': '>0',
+            'error_if': '>0',
         },
 
         'docs': {'show': True},

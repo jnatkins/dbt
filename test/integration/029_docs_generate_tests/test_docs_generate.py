@@ -986,6 +986,10 @@ class TestDocsGenerate(DBTIntegrationTest):
             'vars': {},
             'tags': [],
             'severity': 'ERROR',
+            'warn_if': '>0',
+            'error_if': '>0',
+            'where': None,
+            'limit': None,
             'full_refresh': None,
             'database': None,
             'schema': None,
@@ -1365,7 +1369,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                         'name': 'not_null',
                         'kwargs': {
                             'column_name': 'id',
-                            'model': "{{ ref('model') }}",
+                            'model': "{% if config.get('where') %}(select * from {{ ref('model') }} where {{config.get('where')}}) model{% else %}{{ ref('model') }}{% endif %}",
                         },
                     },
                     'checksum': {'name': 'none', 'checksum': ''},
@@ -1453,7 +1457,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                         'namespace': 'test',
                         'name': 'nothing',
                         'kwargs': {
-                            'model': "{{ ref('model') }}",
+                            'model': "{% if config.get('where') %}(select * from {{ ref('model') }} where {{config.get('where')}}) model{% else %}{{ ref('model') }}{% endif %}",
                         },
                     },
                     'checksum': {'name': 'none', 'checksum': ''},
@@ -1499,7 +1503,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                         'name': 'unique',
                         'kwargs': {
                             'column_name': 'id',
-                            'model': "{{ ref('model') }}",
+                            'model': "{% if config.get('where') %}(select * from {{ ref('model') }} where {{config.get('where')}}) model{% else %}{{ ref('model') }}{% endif %}",
                         },
                     },
                     'checksum': {'name': 'none', 'checksum': ''},

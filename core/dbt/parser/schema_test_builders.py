@@ -185,7 +185,9 @@ class TestBuilder(Generic[Testable]):
         r'(?P<test_name>([a-zA-Z_][0-9a-zA-Z_]*))'
     )
     # kwargs representing test configs
-    MODIFIER_ARGS = ('severity', 'tags', 'enabled')
+    MODIFIER_ARGS = (
+        'severity', 'tags', 'enabled', 'where', 'limit', 'warn_if', 'error_if'
+    )
 
     def __init__(
         self,
@@ -278,6 +280,18 @@ class TestBuilder(Generic[Testable]):
         else:
             return None
 
+    def where(self) -> Optional[str]:
+        return self.modifiers.get('where')
+
+    def limit(self) -> Optional[str]:
+        return self.modifiers.get('limit')
+
+    def warn_if(self) -> Optional[str]:
+        return self.modifiers.get('warn_if')
+
+    def error_if(self) -> Optional[str]:
+        return self.modifiers.get('error_if')
+
     def tags(self) -> List[str]:
         tags = self.modifiers.get('tags', [])
         if isinstance(tags, str):
@@ -334,10 +348,13 @@ class TestBuilder(Generic[Testable]):
         )
 
     def build_model_str(self):
+        targ = self.target
+        cfg_where = "config.get('where')"
         if isinstance(self.target, UnparsedNodeUpdate):
-            fmt = "{{{{ ref('{0.name}') }}}}"
+            identifier = self.target.name
+            target_str = f"{{{{ ref('{targ.name}') }}}}"
         elif isinstance(self.target, UnpatchedSourceDefinition):
-            fmt = "{{{{ source('{0.source.name}', '{0.table.name}') }}}}"
-        else:
-            raise self._bad_type()
-        return fmt.format(self.target)
+            identifier = self.target.table.name
+            target_str = f"{{{{ source('{targ.source.name}', '{targ.table.name}') }}}}"
+        filtered = f"(select * from {target_str} where {{{{{cfg_where}}}}}) {identifier}"
+        return f"{{% if {cfg_where} %}}{filtered}{{% else %}}{target_str}{{% endif %}}"
