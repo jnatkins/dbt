@@ -130,23 +130,24 @@ class SnowflakeCredentials(Credentials):
         result_is_json = False
         result_json = {}
         max_iter = 20
-        iter_count = 0 
+        iter_count = 1
+        # Attempt to obtain JSON for 1 second before throwing an error
         while not result_is_json:
             if iter_count > max_iter:
                 break
-            
+
             result = requests.post(token_url, headers=headers, data=data)
-            
+
             if result.headers.get('content-type') == 'application/json':
                 result_is_json = True
                 result_json = result.json()
-            
+
             iter_count += 1
             sleep(0.05)
 
         if 'access_token' not in result_json:
             raise DatabaseException(f'Did not get a token: {result_json}')
-        
+
         return result_json['access_token']
 
     def _get_private_key(self):
