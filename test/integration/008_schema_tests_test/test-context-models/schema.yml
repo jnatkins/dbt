@@ -8,4 +8,5 @@ models:
         - type_two
     - name: model_c
       tests:
-        - my_test
+        - call_pkg_macro
+        - pkg_and_dispatch

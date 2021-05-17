@@ -372,10 +372,10 @@ class TestSchemaTestContext(DBTIntegrationTest):
         # are working correctly
         self.run_dbt(['deps'])
         results = self.run_dbt(strict=False)
-        self.assertEqual(len(results), 3)
+        self.assertEqual(len(results), 4)
 
         results = self.run_dbt(['test'], expect_pass=False)
-        self.assertEqual(len(results), 3)
+        self.assertEqual(len(results), 4)
         result0 = results[0]
         result1 = results[1]
         for result in results:
