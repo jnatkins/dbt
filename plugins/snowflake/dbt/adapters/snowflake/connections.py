@@ -5,6 +5,7 @@ import re
 from contextlib import contextmanager
 from dataclasses import dataclass
 from io import StringIO
+from time import sleep
 from typing import Optional
 
 from cryptography.hazmat.backends import default_backend
@@ -125,10 +126,27 @@ class SnowflakeCredentials(Credentials):
             'Authorization': f'Basic {auth}',
             'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
         }
-        result = requests.post(token_url, headers=headers, data=data)
-        result_json = result.json()
+
+        result_is_json = False
+        result_json = {}
+        max_iter = 20
+        iter_count = 0 
+        while not result_is_json:
+            if iter_count > max_iter:
+                break
+            
+            result = requests.post(token_url, headers=headers, data=data)
+            
+            if result.headers.get('content-type') == 'application/json':
+                result_is_json = True
+                result_json = result.json()
+            
+            iter_count += 1
+            sleep(0.05)
+
         if 'access_token' not in result_json:
             raise DatabaseException(f'Did not get a token: {result_json}')
+        
         return result_json['access_token']
 
     def _get_private_key(self):
