@@ -92,12 +92,8 @@ class MacroParser(BaseParser[ParsedMacro]):
             yield node
 
     def parse_file(self, block: FileBlock):
-        # mark the file as seen, even if there are no macros in it
-        self.manifest.get_file(block.file)
         source_file = block.file
-
         original_file_path = source_file.path.original_file_path
-
         logger.debug("Parsing {}".format(original_file_path))
 
         # this is really only used for error messages
