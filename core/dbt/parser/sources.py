@@ -57,6 +57,7 @@ class SourcePatcher:
     # with SourcePatches to produce ParsedSourceDefinitions.
     def construct_sources(self) -> None:
         for unique_id, unpatched in self.manifest.sources.items():
+            schema_file = self.manifest.files[unpatched.file_id()]
             if isinstance(unpatched, ParsedSourceDefinition):
                 continue
             # returns None if there is no patch
@@ -65,13 +66,15 @@ class SourcePatcher:
             # returns unpatched if there is no patch
             patched = self.patch_source(unpatched, patch)
 
-            # now use the patched UnpatchedSourceDefinition to extract test
-            # data. 'get_source_tests' uses the schema parser
+            # now use the patched UnpatchedSourceDefinition to extract test data.
             for test in self.get_source_tests(patched):
                 if test.config.enabled:
                     self.manifest.add_node_nofile(test)
                 else:
                     self.manifest.add_disabled_nofile(test)
+                # save the test unique_id in the schema_file, so we can
+                # process in partial parsing
+                schema_file.tests.append(test.unique_id)
 
             # Convert UnpatchedSourceDefinition to a ParsedSourceDefinition
             parsed = self.parse_source(patched)

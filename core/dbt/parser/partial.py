@@ -265,12 +265,12 @@ class PartialParsing:
                 for elem in key_diff['changed']:
                     self.delete_schema_mssa_links(schema_file, dict_key, elem)
                     self.merge_patch(schema_file, dict_key, elem)
-                    if 'enabled' in elem and elem['enabled'] = 'false':
-                        # TODO: schedule_references_nodes_for_parsing?
+                    # TODO: if 'enabled' changed, schedule references to be re-parsed
             if key_diff['deleted']:
                 for elem in key_diff['deleted']:
                     self.delete_schema_mssa_links(schema_file, dict_key, elem)
                     # patches will go away when new is copied to saved
+                    # TODO: schedule references to be re-parsed
             if key_diff['added']:
                 for elem in key_diff['added']:
                     self.merge_patch(schema_file, dict_key, elem)
@@ -283,6 +283,7 @@ class PartialParsing:
                     raise Exception(f"Partial parsing does not handle changed "
                                     f"source overrides: {schema_file.file_id}")
                 self.delete_schema_source(schema_file, source)
+                self.remove_tests(schema_file, source['name'])
                 self.merge_patch(schema_file, 'sources', source)
         if source_diff['deleted']:
             for source in source_diff['deleted']:
@@ -290,6 +291,7 @@ class PartialParsing:
                     raise Exception(f"Partial parsing does not handle deleted "
                                     f"source overrides: {schema_file.file_id}")
                 self.delete_schema_source(schema_file, source)
+                self.remove_tests(schema_file, source['name'])
         if source_diff['added']:
             for source in source_diff['added']:
                 if 'override' in source:
@@ -399,7 +401,6 @@ class PartialParsing:
     # delete the patches and tests from the patch
     def delete_schema_mssa_links(self, schema_file, dict_key, elem):
         # find elem node unique_id in node_patches
-
         prefix = key_to_prefix[dict_key]
         elem_unique_id = ''
         for unique_id in schema_file.node_patches:
@@ -420,7 +421,7 @@ class PartialParsing:
                 # need to add the node source_file to pp_files
                 file_id = node.file_id()
                 # need to copy new file to saved files in order to get content
-                if self.new_files[file_id]:
+                if file_id in self.new_files:
                     self.saved_files[file_id] = self.new_files[file_id]
                 if self.saved_files[file_id]:
                     source_file = self.saved_files[file_id]
@@ -432,29 +433,40 @@ class PartialParsing:
         # for models, seeds, snapshots (not analyses)
         if dict_key in ['models', 'seeds', 'snapshots']:
             # find related tests and remove them
-            tests = self.get_tests_for(schema_file, elem['name'])
-            for test_unique_id in tests:
-                node = self.saved_manifest.nodes.pop(test_unique_id)
-                self.deleted_manifest.nodes[test_unique_id] = node
-                schema_file.tests.remove(test_unique_id)
+            self.remove_tests(schema_file, elem['name'])
+
+    def remove_tests(self, schema_file, name):
+        tests = self.get_tests_for(schema_file, name)
+        for test_unique_id in tests:
+            node = self.saved_manifest.nodes.pop(test_unique_id)
+            self.deleted_manifest.nodes[test_unique_id] = node
+            schema_file.tests.remove(test_unique_id)
 
     # Create a pp_test_index in the schema file if it doesn't exist
     # and look for test names related to this yaml dict element name
-    def get_tests_for(self, schema_file, node_name):
+    def get_tests_for(self, schema_file, name):
         if not schema_file.pp_test_index:
             pp_test_index = {}
             for test_unique_id in schema_file.tests:
                 test_node = self.saved_manifest.nodes[test_unique_id]
-                tested_node_id = test_node.depends_on.nodes[0]
-                parts = tested_node_id.split('.')
-                elem_name = parts[-1]
-                if elem_name in pp_test_index:
-                    pp_test_index[elem_name].append(test_unique_id)
+                if test_node.sources:
+                    for source_ref in test_node.sources:
+                        source_name = source_ref[0]
+                        if source_name in pp_test_index:
+                            pp_test_index[source_name].append(test_unique_id)
+                        else:
+                            pp_test_index[source_name] = [test_unique_id]
                 else:
-                    pp_test_index[elem_name] = [test_unique_id]
+                    tested_node_id = test_node.depends_on.nodes[0]
+                    parts = tested_node_id.split('.')
+                    elem_name = parts[-1]
+                    if elem_name in pp_test_index:
+                        pp_test_index[elem_name].append(test_unique_id)
+                    else:
+                        pp_test_index[elem_name] = [test_unique_id]
             schema_file.pp_test_index = pp_test_index
-        if node_name in schema_file.pp_test_index:
-            return schema_file.pp_test_index[node_name]
+        if name in schema_file.pp_test_index:
+            return schema_file.pp_test_index[name]
         return []
 
     def delete_mssat_file(self, source_file):
@@ -465,7 +477,7 @@ class PartialParsing:
         # There is generally only 1 node for SQL files, except for macros
         for unique_id in source_file.nodes:
             self.delete_node_in_saved(source_file, unique_id)
-            self.schedule_nodes_for_parsing(source_file, unique_id)
+            self.schedule_referenced_nodes_for_parsing(source_file, unique_id)
 
     def delete_macro_file(self, source_file):
         self.handle_macro_file_links(source_file)
@@ -517,7 +529,7 @@ class PartialParsing:
             if unique_id in self.saved_manifest.sources:
                 source = self.saved_manifest.sources[unique_id]
                 if source.source_name == source_name:
-                    source = self.saved_manifest.exposures.pop(unique_id)
+                    source = self.saved_manifest.sources.pop(unique_id)
                     self.deleted_manifest.sources[unique_id] = source
                     logger.debug(f"Partial parsing: deleted source {unique_id}")
 
@@ -549,9 +561,12 @@ class PartialParsing:
                         self.saved_manifest.exposures.pop(unique_id)
                     logger.debug(f"Partial parsing: deleted exposure {unique_id}")
 
-    def schedule_referenced_nodes_for_parsing(source_file, unique_id):
+    def schedule_referenced_nodes_for_parsing(self, source_file, unique_id):
         # Look at "children", i.e. nodes that reference this node
         for unique_id in self.saved_manifest.child_map[unique_id]:
             if unique_id in self.saved_manifest.nodes:
                 node = self.saved_manifest.nodes[unique_id]
-                # TODO: now do something with the node. Need a bit of refactoring...
+                file_id = node.file_id()
+                if file_id in self.saved_files and file_id not in self.file_diff['deleted']:
+                    source_file = self.saved_files[file_id]
+                    self.delete_mssat_file(source_file)

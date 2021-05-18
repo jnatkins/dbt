@@ -117,25 +117,47 @@ class TestSources(DBTIntegrationTest):
     def project_config(self):
         cfg = {
             'config-version': 2,
-            'data-paths': ['seed']
+            'data-paths': ['seed'],
+            'seeds': {
+                'quote_columns': False,
+            },
         }
         return cfg
 
+    def tearDown(self):
+        if os.path.exists(normalize('models/sources.yml')):
+            os.remove(normalize('models/sources.yml'))
+        if os.path.exists(normalize('seed/raw_customers.csv')):
+            os.remove(normalize('seed/raw_customers.csv'))
 
 
     @use_profile('postgres')
     def test_postgres_pp_sources(self):
         # initial run
+        shutil.copyfile('extra-files/raw_customers.csv', 'seed/raw_customers.csv')
         self.run_dbt(['clean'])
         results = self.run_dbt(["run"])
         self.assertEqual(len(results), 1)
 
         # create a seed file, parse and run it
-#       shutil.copyfile('extra-files/raw_customers.csv', 'seed/raw_customers.csv')
-#       self.run_dbt(['seed'])
-#       manifest = get_manifest()
-#       seed_file_id = 'test://' + normalize('seed/raw_customers.csv')
-#       self.assertIn(seed_file_id, manifest.files)
+        self.run_dbt(['seed'])
+        manifest = get_manifest()
+        seed_file_id = 'test://' + normalize('seed/raw_customers.csv')
+        self.assertIn(seed_file_id, manifest.files)
+
+        # add a schema files with a source referring to raw_customers
+        shutil.copyfile('extra-files/schema-sources1.yml', 'models/sources.yml')
+        results = self.run_dbt(["--partial-parse", "run"])
+        manifest = get_manifest()
+        self.assertEqual(len(manifest.sources), 1)
+        file_id = 'test://' + normalize('models/sources.yml')
+        self.assertIn(file_id, manifest.files)
+
+        # remove sources schema file
+        os.remove(normalize('models/sources.yml'))
+        results = self.run_dbt(["--partial-parse", "run"])
+        manifest = get_manifest()
+        self.assertEqual(len(manifest.sources), 0)
 
 
 class TestPartialParsingDependency(DBTIntegrationTest):

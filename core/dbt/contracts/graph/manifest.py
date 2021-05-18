@@ -783,9 +783,8 @@ class Manifest(MacroMethods, DataClassMessagePackMixin, dbtClassMixin):
         self.child_map = forward_edges
         self.parent_map = backward_edges
 
-
     def writable_manifest(self):
-        self.build_parend_and_child_maps(self):
+        self.build_parent_and_child_maps()
         return WritableManifest(
             nodes=self.nodes,
             sources=self.sources,
