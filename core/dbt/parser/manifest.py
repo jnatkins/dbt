@@ -201,6 +201,8 @@ class ManifestLoader:
             partial_parsing = PartialParsing(self.saved_manifest, self.manifest.files)
             skip_parsing = partial_parsing.skip_parsing()
             if not skip_parsing:
+                # create child_map and parent_map
+                self.saved_manifest.build_parent_and_child_maps()
                 # files are different, we need to create a new set of
                 # project_parser_files.
                 project_parser_files = partial_parsing.get_parsing_files()

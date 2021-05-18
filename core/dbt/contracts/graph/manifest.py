@@ -773,14 +773,19 @@ class Manifest(MacroMethods, DataClassMessagePackMixin, dbtClassMixin):
             state_check=_deepcopy(self.state_check),
         )
 
-    def writable_manifest(self):
+    def build_parent_and_child_maps(self):
         edge_members = list(chain(
             self.nodes.values(),
             self.sources.values(),
             self.exposures.values(),
         ))
         forward_edges, backward_edges = build_edges(edge_members)
+        self.child_map = forward_edges
+        self.parent_map = backward_edges
 
+
+    def writable_manifest(self):
+        self.build_parend_and_child_maps(self):
         return WritableManifest(
             nodes=self.nodes,
             sources=self.sources,
@@ -790,8 +795,8 @@ class Manifest(MacroMethods, DataClassMessagePackMixin, dbtClassMixin):
             selectors=self.selectors,
             metadata=self.metadata,
             disabled=self.disabled,
-            child_map=forward_edges,
-            parent_map=backward_edges,
+            child_map=self.child_map,
+            parent_map=self.parent_map,
         )
 
     def write(self, path):

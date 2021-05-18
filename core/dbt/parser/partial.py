@@ -265,6 +265,8 @@ class PartialParsing:
                 for elem in key_diff['changed']:
                     self.delete_schema_mssa_links(schema_file, dict_key, elem)
                     self.merge_patch(schema_file, dict_key, elem)
+                    if 'enabled' in elem and elem['enabled'] = 'false':
+                        # TODO: schedule_references_nodes_for_parsing?
             if key_diff['deleted']:
                 for elem in key_diff['deleted']:
                     self.delete_schema_mssa_links(schema_file, dict_key, elem)
@@ -463,6 +465,7 @@ class PartialParsing:
         # There is generally only 1 node for SQL files, except for macros
         for unique_id in source_file.nodes:
             self.delete_node_in_saved(source_file, unique_id)
+            self.schedule_nodes_for_parsing(source_file, unique_id)
 
     def delete_macro_file(self, source_file):
         self.handle_macro_file_links(source_file)
@@ -545,3 +548,10 @@ class PartialParsing:
                     self.deleted_manifest.exposures[unique_id] = \
                         self.saved_manifest.exposures.pop(unique_id)
                     logger.debug(f"Partial parsing: deleted exposure {unique_id}")
+
+    def schedule_referenced_nodes_for_parsing(source_file, unique_id):
+        # Look at "children", i.e. nodes that reference this node
+        for unique_id in self.saved_manifest.child_map[unique_id]:
+            if unique_id in self.saved_manifest.nodes:
+                node = self.saved_manifest.nodes[unique_id]
+                # TODO: now do something with the node. Need a bit of refactoring...
