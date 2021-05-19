@@ -1,15 +1,23 @@
 {%- materialization test, default -%}
 
   {% set limit = config.get('limit') %}
+  {% set fail_calc = config.get('fail_calc') %}
+  {% set warn_if = config.get('warn_if') %}
+  {% set error_if = config.get('error_if') %}
 
   {% call statement('main', fetch_result=True) -%}
 
-    select count(*) as validation_errors
+    select
+      {{ fail_calc }} as validation_errors,
+      {{ fail_calc }} {{ warn_if }} as should_warn,
+      {{ fail_calc }} {{ error_if }} as should_error,
+      '{{ warn_if }}' as warn_if,
+      '{{ error_if }}' as error_if
     from (
       {{ sql }}
       {{ "limit " ~ limit if limit }}
     ) _dbt_internal_test
-    
+
   {% endcall %}
 
 {%- endmaterialization -%}

@@ -372,7 +372,17 @@ class ParsedSchemaTestNode(ParsedNode, HasTestMetadata):
     def same_config(self, other) -> bool:
         return (
             self.unrendered_config.get('severity') ==
-            other.unrendered_config.get('severity')
+            other.unrendered_config.get('severity') and
+            self.unrendered_config.get('where') ==
+            other.unrendered_config.get('where') and
+            self.unrendered_config.get('limit') ==
+            other.unrendered_config.get('limit') and
+            self.unrendered_config.get('fail_calc') ==
+            other.unrendered_config.get('fail_calc') and
+            self.unrendered_config.get('error_if') ==
+            other.unrendered_config.get('error_if') and
+            self.unrendered_config.get('warn_if') ==
+            other.unrendered_config.get('warn_if')
         )
 
     def same_column_name(self, other) -> bool:
