@@ -186,7 +186,7 @@ class TestBuilder(Generic[Testable]):
     )
     # kwargs representing test configs
     MODIFIER_ARGS = (
-        'severity', 'tags', 'enabled', 'where', 'limit', 'warn_if', 'error_if'
+        'severity', 'tags', 'enabled', 'where', 'limit', 'warn_if', 'error_if', 'fail_calc'
     )
 
     def __init__(
