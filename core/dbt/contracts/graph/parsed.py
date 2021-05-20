@@ -369,22 +369,7 @@ class ParsedSchemaTestNode(ParsedNode, HasTestMetadata):
     column_name: Optional[str] = None
     config: TestConfig = field(default_factory=TestConfig)
 
-    def same_config(self, other) -> bool:
-        return (
-            self.unrendered_config.get('severity') ==
-            other.unrendered_config.get('severity') and
-            self.unrendered_config.get('where') ==
-            other.unrendered_config.get('where') and
-            self.unrendered_config.get('limit') ==
-            other.unrendered_config.get('limit') and
-            self.unrendered_config.get('fail_calc') ==
-            other.unrendered_config.get('fail_calc') and
-            self.unrendered_config.get('error_if') ==
-            other.unrendered_config.get('error_if') and
-            self.unrendered_config.get('warn_if') ==
-            other.unrendered_config.get('warn_if')
-        )
-
+    # TODO: this is unused
     def same_column_name(self, other) -> bool:
         return self.column_name == other.column_name
 
