@@ -99,12 +99,12 @@ def statically_parse_adapter_dispatch(func_call, ctx, db_wrapper):
     packages = []
     packages_arg = None
     packages_arg_type = None
-    
+
     if len(func_call.args) > 1:
         packages_arg = func_call.args[1]
         # This can be a List or a Call
         packages_arg_type = type(func_call.args[1]).__name__
-    
+
     # keyword arguments
     if func_call.kwargs:
         for kwarg in func_call.kwargs:
@@ -119,7 +119,7 @@ def statically_parse_adapter_dispatch(func_call, ctx, db_wrapper):
                 else:
                     raise_compiler_error(f"The macro_name parameter ({kwarg.value.value}) "
                                          "to adapter.dispatch was not a string")
-        
+
     if packages_arg:
         # Now we might have a 'List', a 'Call', or a 'Const' for a non-call or a var call
         if packages_arg_type == 'List':
@@ -141,12 +141,14 @@ def statically_parse_adapter_dispatch(func_call, ctx, db_wrapper):
                         packages.extend(namespace_names)
                 else:
                     msg = (
-                        f"As of v0.19.2, custom macros, such as '{macro_name}', are no longer supported in the 'packages' argument of 'adapter.dispatch()'.\n" \
-                        f"See https://docs.getdbt.com/reference/dbt-jinja-functions/dispatch for details."
+                        f"As of v0.19.2, custom macros, such as '{macro_name}', are no longer "
+                        "supported in the 'packages' argument of 'adapter.dispatch()'.\n"
+                        f"See https://docs.getdbt.com/reference/dbt-jinja-functions/dispatch "
+                        "for details."
                     ).strip()
                     raise_compiler_error(msg)
-        # I'm not sure if the following logic works as intended, or if we need it for backwards compatibility
-        # We should propose a new way of doing this going forward
+        # I'm not sure if the following logic works as intended, or if we need it for backwards
+        # compatibility. We should propose a new way of doing this going forward
         elif packages_arg_type == 'Add':
             namespace_var = None
             default_namespaces = []
@@ -163,7 +165,6 @@ def statically_parse_adapter_dispatch(func_call, ctx, db_wrapper):
                 namespace_names = get_dispatch_list(ctx, namespace_var, default_namespaces)
                 if namespace_names:
                     packages.extend(namespace_names)
-            
 
     if db_wrapper:
         if not packages:
