@@ -38,11 +38,11 @@ class MacroCalls(unittest.TestCase):
             ['get_columns_in_query'],
             ['get_snapshot_unique_id'],
             ['dbt_utils.current_timestamp'],
-            ['test_pkg_and_dispatch1', 'foo_utils4.test_pkg_and_dispatch1', 'local_utils._get_utils_namespaces'],
+            ['test_pkg_and_dispatch1', 'foo_utils4.test_pkg_and_dispatch1', 'local_utils.test_pkg_and_dispatch1', 'local_utils._get_utils_namespaces'],
             ['test_some_kind1', 'foo_utils1.test_some_kind1'],
             ['test_some_kind2', 'foo_utils2.test_some_kind2'],
             ['test_some_kind3', 'foo_utils3.test_some_kind3'],
-            ['test_pkg_and_dispatch2', 'foo_utils4.test_pkg_and_dispatch2'],
+            ['test_pkg_and_dispatch2', 'foo_utils4.test_pkg_and_dispatch2', 'local_utils2.test_pkg_and_dispatch2'],
         ]
 
     def test_macro_calls(self):
