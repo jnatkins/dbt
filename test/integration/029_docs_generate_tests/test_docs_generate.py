@@ -2955,6 +2955,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -2964,6 +2965,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -2973,6 +2975,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -2982,6 +2985,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -2991,6 +2995,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -3000,6 +3005,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -3009,6 +3015,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
         ]
 
@@ -3022,6 +3029,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -3031,6 +3039,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -3040,6 +3049,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
             {
                 'status': 'success',
@@ -3049,6 +3059,7 @@ class TestDocsGenerate(DBTIntegrationTest):
                 'adapter_response': ANY,
                 'thread_id': ANY,
                 'timing': [ANY, ANY],
+                'failures': ANY,
             },
         ]
 
